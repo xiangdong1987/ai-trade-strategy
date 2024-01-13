@@ -1,0 +1,32 @@
+//@version=4
+study("缠论基础分型", shorttitle="缠论分型", overlay=true)
+
+// 分型定义：两边各有至少两根K线的顶分型和底分型
+n = input(2, minval=1, title="边界K线数量")
+
+// 顶分型：中间K线的最高点比两边的K线高
+isTopFractal(i) =>
+    highest = high[i]
+    left = true
+    right = true
+    for j = 1 to n
+        left := left and (highest > high[i - j])
+        right := right and (highest > high[i + j])
+    left and right
+
+// 底分型：中间K线的最低点比两边的K线低
+isBottomFractal(i) =>
+    lowest = low[i]
+    left = true
+    right = true
+    for j = 1 to n
+        left := left and (lowest < low[i - j])
+        right := right and (lowest < low[i + j])
+    left and right
+
+// 绘制分型
+for i = n to bar_index - n
+    if isTopFractal(i)
+        plotshape(series=high[i], location=location.abovebar, color=color.red, style=shape.triangleup, size=size.small, title="顶分型")
+    if isBottomFractal(i)
+        plotshape(series=low[i], location=location.belowbar, color=color.green, style=shape.triangledown, size=size.small, title="底分型")

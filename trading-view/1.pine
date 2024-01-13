@@ -1,0 +1,46 @@
+//@version=4
+strategy("BTC STRATEGY", overlay=true)
+
+ma5 = sma(close, 5)  
+ma10 = sma(close, 10)
+ma30 = sma(close, 30)
+
+// 绘制MA线
+plot(ma5, "MA5", color=#2196f3)  
+plot(ma10, "MA10", color=#4caf50)
+plot(ma30, "MA30", color=#ff9800)
+
+slope5 = (ma5/ma5[1])-1  
+slope10 = (ma10/ma10[1])-1  
+slope30 = (ma30/ma30[1])-1  
+
+trend =  slope5 > 0.2 and slope10 > 0.2 and slope30 > 0.2 ? "uptrend" :  
+         slope5 < -0.2 and slope10 < -0.2 and slope30 < -0.2 ? "downtrend" :  
+         "sideway"  
+
+ma5_gt_ma10 = ma5 > ma10
+ma10_gt_ma30 = ma10 > ma30
+
+// 买入点
+buyPrice = high   // 输入当日最高价作为买入点
+bull = trend == "uptrend" and ma5_gt_ma10 and ma10_gt_ma30 
+long_entry = bull 
+
+// 卖出点  
+sellPrice = low    // 输入当日最低价作为卖出点
+bear = trend == "downtrend" and not ma5_gt_ma10 and not ma10_gt_ma30  
+short_entry = bear
+
+// 止损点  
+longSL = buyPrice * 0.95  
+shortSL = sellPrice * 1.05
+
+// 最大仓位数    
+max_positions = 3   
+
+// 开多策略  
+if (long_entry)
+    strategy.entry("BUY", strategy.long)
+if (short_entry)
+    strategy.entry("SELL", strategy.short)
+
